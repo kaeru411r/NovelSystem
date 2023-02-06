@@ -632,6 +632,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _fileName: testCSV2.csv
+  _textWriter: {fileID: 1966800724}
 --- !u!1 &714048729
 GameObject:
   m_ObjectHideFlags: 0
@@ -1198,12 +1199,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9dcea304c7a55534180439703d7eb6d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _texts:
-  - ura-------------
-  - nafoaingpoiweg
-  - eoinoivoidvsd
-  - gabaerbarvb
-  - baerhetnt
   _text: {fileID: 61412297}
   _name: {fileID: 662392667}
-  _writeSpeed: 0.1
+  _writeSpeed: 10

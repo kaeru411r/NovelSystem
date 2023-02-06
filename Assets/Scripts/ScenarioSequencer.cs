@@ -7,11 +7,16 @@ using TMPro;
 
 public class ScenarioSequencer : MonoBehaviour
 {
+    [Tooltip("CSVファイルの名前")]
     [SerializeField] string _fileName;
+    [Tooltip("テキスト表示用コンポーネント")]
+    [SerializeField] MonoSequentialActor _textWriter;
+
+    const int csvOffsetNumber = 1;
 
     private void Start()
     {
-        StartCoroutine(MainSequence(CSVReader.Read(_fileName, 1)));
+        StartCoroutine(MainSequence(CSVReader.Read(_fileName, csvOffsetNumber)));
     }
 
 
@@ -35,33 +40,77 @@ public class ScenarioSequencer : MonoBehaviour
             switch (commandType)
             {
                 case CommandType.Write:
-                    Debug.Log("Write");
-                    yield return null;
+                    enumeratorList.Add(_textWriter.Activity(command, skipSource.Token));
+                    yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
+                    skipSource = new SkipSource();
                     break;
             }
         }
     }
 
-    IEnumerator A(float time)
+    /// <summary>
+    /// いずれかのマウスボタンが押されるのを待つ
+    /// </summary>
+    IEnumerator WaitForGetMouseButtonDown()
     {
-        yield return new WaitForSeconds(time);
+        while (true)
+        {
+            yield return null;
+
+            for (int i = 0; i < 3; i++)
+            {
+                if (Input.GetMouseButtonDown(i))
+                {
+                    yield break;
+                }
+            }
+        }
     }
 
-    IEnumerator Activity(List<IEnumerator> enumerators, IEnumerator waiter, SkipSource skipSource)
+    /// <summary>
+    /// <paramref name="enumerators"/>を実行する。<br></br>
+    /// <paramref name="enumerators"/>か<paramref name="waitAndSkip"/>が完了するのを待つ<br></br>
+    /// 完了後、<paramref name="enumerators"/>をクリアした後、再度<paramref name="waitAndSkip"/>の完了を待つ
+    /// </summary>
+    /// <param name="enumerators"></param>
+    /// <param name="waitAndSkip"></param>
+    /// <param name="skipSource"></param>
+    IEnumerator Activity(List<IEnumerator> enumerators, Func<IEnumerator> waitAndSkip, SkipSource skipSource)
     {
-        if (waiter == null)
+        return Activity(enumerators, waitAndSkip, waitAndSkip, skipSource);
+    }
+
+
+    /// <summary>
+    /// <paramref name="enumerators"/>を実行する。<br></br>
+    /// <paramref name="enumerators"/>か<paramref name="skip"/>が完了するのを待つ<br></br>
+    /// 完了後、<paramref name="enumerators"/>をクリアした後、<paramref name="wait"/>の完了を待つ
+    /// </summary>
+    /// <param name="enumerators"></param>
+    /// <param name="wait"></param>
+    /// <param name="skip"></param>
+    /// <param name="skipSource"></param>
+    IEnumerator Activity(List<IEnumerator> enumerators, Func<IEnumerator> wait, Func<IEnumerator> skip, SkipSource skipSource)
+    {
+        bool isComplete = false;
+        yield return WaitAny(Wait(WaitAll(enumerators.ToArray()), () => isComplete = true), skip?.Invoke());
+        if (!isComplete)
         {
-            yield return WaitAll(enumerators.ToArray());
-        }
-        else
-        {
-            yield return WaitAny(WaitAll(enumerators.ToArray()), waiter);
             skipSource.Skip();
+        }
+
+        if (wait != null)
+        {
+            yield return wait.Invoke();
         }
 
         enumerators.Clear();
     }
 
+    /// <summary>
+    /// <paramref name="enumerators"/>のいずれかの完了を待つ
+    /// </summary>
+    /// <param name="enumerators"></param>
     IEnumerator WaitAny(params IEnumerator[] enumerators)
     {
         bool wait = false;
@@ -77,6 +126,10 @@ public class ScenarioSequencer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// <paramref name="enumerators"/>全ての完了を待つ
+    /// </summary>
+    /// <param name="enumerators"></param>
     IEnumerator WaitAll(params IEnumerator[] enumerators)
     {
         int count = 0;
@@ -92,6 +145,11 @@ public class ScenarioSequencer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// <paramref name="enumerator"/>が完了したら<paramref name="action"/>を実行する
+    /// </summary>
+    /// <param name="enumerator"></param>
+    /// <param name="action"></param>
     IEnumerator Wait(IEnumerator enumerator, Action action)
     {
         yield return enumerator;
