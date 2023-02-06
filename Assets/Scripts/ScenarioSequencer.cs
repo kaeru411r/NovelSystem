@@ -24,7 +24,7 @@ public class ScenarioSequencer : MonoBehaviour
 
     IEnumerator MainSequence(string[][] sequence)
     {
-        List<IEnumerator> enumeratorList = new List<IEnumerator>();
+        List<YieldInstruction> enumeratorList = new List<YieldInstruction>();
         SkipSource skipSource = new SkipSource();
 
         foreach (string[] command in sequence)
@@ -42,12 +42,12 @@ public class ScenarioSequencer : MonoBehaviour
             switch (commandType)
             {
                 case CommandType.Write:
-                    enumeratorList.Add(_textWriter.Activity(command, skipSource.Token));
+                    enumeratorList.Add(StartCoroutine(_textWriter.Activity(command, skipSource.Token)));
                     yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
                     skipSource = new SkipSource();
                     break;
                 case CommandType.Fade:
-                    enumeratorList.Add(_fader.Activity(command, skipSource.Token));
+                    enumeratorList.Add(StartCoroutine(_fader.Activity(command, skipSource.Token)));
                     break;
             }
         }
@@ -80,7 +80,7 @@ public class ScenarioSequencer : MonoBehaviour
     /// <param name="enumerators"></param>
     /// <param name="waitAndSkip"></param>
     /// <param name="skipSource"></param>
-    IEnumerator Activity(List<IEnumerator> enumerators, Func<IEnumerator> waitAndSkip, SkipSource skipSource)
+    IEnumerator Activity(List<YieldInstruction> enumerators, Func<IEnumerator> waitAndSkip, SkipSource skipSource)
     {
         return Activity(enumerators, waitAndSkip, waitAndSkip, skipSource);
     }
@@ -95,10 +95,11 @@ public class ScenarioSequencer : MonoBehaviour
     /// <param name="wait"></param>
     /// <param name="skip"></param>
     /// <param name="skipSource"></param>
-    IEnumerator Activity(List<IEnumerator> enumerators, Func<IEnumerator> wait, Func<IEnumerator> skip, SkipSource skipSource)
+    IEnumerator Activity(List<YieldInstruction> enumerators, Func<IEnumerator> wait, Func<IEnumerator> skip, SkipSource skipSource)
     {
         bool isComplete = false;
-        yield return WaitAny(Wait(WaitAll(enumerators.ToArray()), () => isComplete = true), skip?.Invoke());
+        Coroutine skipCoroutine = StartCoroutine(skip?.Invoke());
+        yield return WaitAnyCo(WaitCo(WaitAllCo(enumerators.ToArray()), () => isComplete = true), skipCoroutine);
         if (!isComplete)
         {
             skipSource.Skip();
@@ -106,7 +107,7 @@ public class ScenarioSequencer : MonoBehaviour
 
         if (wait != null)
         {
-            yield return wait.Invoke();
+            yield return StartCoroutine(wait?.Invoke());
         }
 
         enumerators.Clear();
@@ -116,13 +117,18 @@ public class ScenarioSequencer : MonoBehaviour
     /// <paramref name="enumerators"/>‚Ì‚¢‚¸‚ê‚©‚ÌŠ®—¹‚ð‘Ò‚Â
     /// </summary>
     /// <param name="enumerators"></param>
-    IEnumerator WaitAny(params IEnumerator[] enumerators)
+    Coroutine WaitAnyCo(params YieldInstruction[] enumerators)
+    {
+        return StartCoroutine(WaitAny(enumerators));
+
+    }
+    IEnumerator WaitAny(params YieldInstruction[] enumerators)
     {
         bool wait = false;
 
-        foreach (IEnumerator enumerator in enumerators)
+        foreach (YieldInstruction enumerator in enumerators)
         {
-            StartCoroutine(Wait(enumerator, () => wait = true));
+            WaitCo(enumerator, () => wait = true);
         }
 
         while (!wait)
@@ -135,13 +141,18 @@ public class ScenarioSequencer : MonoBehaviour
     /// <paramref name="enumerators"/>‘S‚Ä‚ÌŠ®—¹‚ð‘Ò‚Â
     /// </summary>
     /// <param name="enumerators"></param>
-    IEnumerator WaitAll(params IEnumerator[] enumerators)
+    Coroutine WaitAllCo(params YieldInstruction[] enumerators)
+    {
+        return StartCoroutine(WaitAll(enumerators));
+
+    }
+    IEnumerator WaitAll(params YieldInstruction[] enumerators)
     {
         int count = 0;
 
-        foreach (IEnumerator enumerator in enumerators)
+        foreach (YieldInstruction enumerator in enumerators)
         {
-            StartCoroutine(Wait(enumerator, () => count++));
+            WaitCo(enumerator, () => count++);
         }
 
         while (count < enumerators.Length)
@@ -155,7 +166,12 @@ public class ScenarioSequencer : MonoBehaviour
     /// </summary>
     /// <param name="enumerator"></param>
     /// <param name="action"></param>
-    IEnumerator Wait(IEnumerator enumerator, Action action)
+    Coroutine WaitCo(YieldInstruction enumerator, Action action)
+    {
+        return StartCoroutine(Wait(enumerator, action));
+
+    }
+    IEnumerator Wait(YieldInstruction enumerator, Action action)
     {
         yield return enumerator;
         action?.Invoke();
