@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Linq;
+using TMPro;
 
 public class ScenarioSequencer : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class ScenarioSequencer : MonoBehaviour
     IEnumerator MainSequence(string[][] sequence)
     {
         List<IEnumerator> enumeratorList = new List<IEnumerator>();
+        SkipSource skipSource = new SkipSource();
 
         foreach (string[] command in sequence)
         {
@@ -28,6 +30,7 @@ public class ScenarioSequencer : MonoBehaviour
             catch (ArgumentException e)
             {
                 Debug.LogError($"{nameof(command)}は不正なコマンドです。");
+                continue;
             }
             switch (commandType)
             {
@@ -44,7 +47,7 @@ public class ScenarioSequencer : MonoBehaviour
         yield return new WaitForSeconds(time);
     }
 
-    IEnumerator Activity(List<IEnumerator> enumerators, IEnumerator waiter)
+    IEnumerator Activity(List<IEnumerator> enumerators, IEnumerator waiter, SkipSource skipSource)
     {
         if (waiter == null)
         {
@@ -53,6 +56,7 @@ public class ScenarioSequencer : MonoBehaviour
         else
         {
             yield return WaitAny(WaitAll(enumerators.ToArray()), waiter);
+            skipSource.Skip();
         }
 
         enumerators.Clear();
@@ -104,4 +108,30 @@ enum CommandType
     Destroy,
     Fade,
     Color,
+}
+
+public class SkipSource
+{
+    public bool IsSkip { get => _isSkip; set => _isSkip = value; }
+
+    public SkipToken Token { get => new SkipToken(this); }
+
+    public void Skip()
+    {
+        _isSkip = true;
+    }
+
+    bool _isSkip = false;
+}
+
+public struct SkipToken
+{
+    public SkipToken(SkipSource skipSource)
+    {
+        _skipSource = skipSource;
+    }
+
+    public bool IsSkip { get => _skipSource.IsSkip; }
+
+    SkipSource _skipSource;
 }
