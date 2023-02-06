@@ -6,4 +6,9 @@ public abstract class MonoSequentialActor : MonoBehaviour
 {
 
     public abstract IEnumerator Activity(string[] command, SkipToken token);
+
+    public Coroutine ActivityCoroutine(string[] command, SkipToken token)
+    {
+        return StartCoroutine(Activity(command, token));
+    }
 }
