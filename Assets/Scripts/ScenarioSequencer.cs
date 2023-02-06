@@ -11,6 +11,8 @@ public class ScenarioSequencer : MonoBehaviour
     [SerializeField] string _fileName;
     [Tooltip("テキスト表示用コンポーネント")]
     [SerializeField] MonoSequentialActor _textWriter;
+    [Tooltip("ImageFade用コンポーネント")]
+    [SerializeField] MonoSequentialActor _fader;
 
     const int csvOffsetNumber = 1;
 
@@ -43,6 +45,9 @@ public class ScenarioSequencer : MonoBehaviour
                     enumeratorList.Add(_textWriter.Activity(command, skipSource.Token));
                     yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
                     skipSource = new SkipSource();
+                    break;
+                case CommandType.Fade:
+                    enumeratorList.Add(_fader.Activity(command, skipSource.Token));
                     break;
             }
         }
