@@ -9,12 +9,15 @@ public class ScenarioSequencer : MonoBehaviour
 {
     [Tooltip("CSVファイルの名前")]
     [SerializeField] string _fileName;
+    [Tooltip("オブジェクト管理用オブジェクト")]
+    [SerializeField] ObjectManager _objectManager;
     [Tooltip("テキスト表示用コンポーネント")]
     [SerializeField] MonoSequentialActor _textWriter;
     [Tooltip("ImageFade用コンポーネント")]
     [SerializeField] MonoSequentialActor _fader;
 
     const int csvOffsetNumber = 1;
+    const int commandTypeIndex = 0;
 
     private void Start()
     {
@@ -29,26 +32,30 @@ public class ScenarioSequencer : MonoBehaviour
 
         foreach (string[] command in sequence)
         {
+            if(command.Length == 1 && command[0] == "") { break; }
             CommandType commandType = CommandType.NaN;
-            try
+            if (Enum.TryParse<CommandType>(command[commandTypeIndex], out commandType))
             {
-                commandType = Enum.Parse<CommandType>(command[0]);
+                switch (commandType)
+                {
+                    case CommandType.Write:
+                        enumeratorList.Add(_textWriter.ActivityCoroutine(command, skipSource.Token));
+                        yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
+                        skipSource = new SkipSource();
+                        break;
+                    case CommandType.Fade:
+                        enumeratorList.Add(_fader.ActivityCoroutine(command, skipSource.Token));
+                        break;
+                    case CommandType.Wait:
+                        yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
+                        skipSource = new SkipSource();
+                        break;
+                }
             }
-            catch (ArgumentException e)
+            else
             {
                 Debug.LogError($"{nameof(command)}は不正なコマンドです。");
                 continue;
-            }
-            switch (commandType)
-            {
-                case CommandType.Write:
-                    enumeratorList.Add(_textWriter.ActivityCoroutine(command, skipSource.Token));
-                    yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
-                    skipSource = new SkipSource();
-                    break;
-                case CommandType.Fade:
-                    enumeratorList.Add(_fader.ActivityCoroutine(command, skipSource.Token));
-                    break;
             }
         }
     }
@@ -176,18 +183,20 @@ public class ScenarioSequencer : MonoBehaviour
         yield return enumerator;
         action?.Invoke();
     }
+
+    public enum CommandType
+    {
+        NaN = -1,
+        Wait,
+        Write,
+        Instantiate,
+        Destroy,
+        Fade,
+        Color,
+        Layer,
+    }
 }
 
-enum CommandType
-{
-    NaN = -1,
-    Wait,
-    Write,
-    Instantiate,
-    Destroy,
-    Fade,
-    Color,
-}
 
 public class SkipSource
 {

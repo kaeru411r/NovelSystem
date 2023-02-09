@@ -6,13 +6,15 @@ using UnityEngine.UI;
 
 public class Fader : MonoSequentialActor
 {
-    const int nameIndex = 1;
-    const int colorIndex = 2;
-    const int timeIndex = 3;
+    const int layerIndex = 1;
+    const int nameIndex = 2;
+    const int colorIndex = 3;
+    const int timeIndex = 4;
 
     public override IEnumerator Activity(string[] command, SkipToken token)
     {
-        if (GameObject.Find(command[nameIndex])?.TryGetComponent(out Image image) is true)
+        GameObject go = ObjectManager.Instance.Find(command[layerIndex], command[nameIndex]);
+        if (go?.TryGetComponent(out Image image) is true)
         {
             Color start = image.color;
             float time = 0f;

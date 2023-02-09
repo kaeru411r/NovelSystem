@@ -13,20 +13,31 @@ public class TextWriter : MonoSequentialActor
     [Tooltip("テキストの進行スピード")]
     [SerializeField] float _writeSpeed;
 
+    const int nameIndex = 1;
+    const int textIndex = 2;
+
 
     public override IEnumerator Activity(string[] command, SkipToken token)
     {
-        _name.text = command[1];
+        _name.text = command[nameIndex];
         _text.text = "";
 
-        foreach (char c in command[2])
+        if (ObjectManager.Instance.TryFind(ObjectManager.UILayerGroup.Character, command[nameIndex], out GameObject gameObject))
+        {
+            if(gameObject.TryGetComponent(out ActorController actor))
+            {
+                actor.Activate();
+            }
+        }
+
+        foreach (char c in command[textIndex])
         {
             _text.text += c;
             yield return new WaitForSeconds(1 / _writeSpeed);
 
             if (token.IsSkip)
             {
-                _text.text = command[2];
+                _text.text = command[textIndex];
                 yield break;
             }
         }
