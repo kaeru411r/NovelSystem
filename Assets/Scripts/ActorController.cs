@@ -30,14 +30,20 @@ public class ActorController : MonoBehaviour
 
     public void Activate()
     {
-        active?.InActive();
+        active?.InActivate();
         transform.SetAsLastSibling();
         Image.color = Color.white;
         active = this;
     }
 
-    public void InActive()
+    public void InActivate()
     {
         Image.color = inactiveColor;
+    }
+
+
+    private void Awake()
+    {
+        InActivate();
     }
 }
