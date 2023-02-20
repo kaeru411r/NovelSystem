@@ -62,6 +62,18 @@ public class ObjectManager : MonoBehaviour
     /// <summary>UI層管理用オブジェクト</summary>
     public RectTransform UI { get => _ui; set => _ui = value; }
 
+    public void Instantiate(UILayerGroup layerGroup, string name, Vector2 pos)
+    {
+        GameObject go = Resources.Load(name) as GameObject;
+        if (go)
+        {
+            Instantiate(go, pos, Quaternion.identity, GetGroup(layerGroup));
+        }
+        else
+        {
+            Debug.Log($"{nameof(go)}が見つかりませんでした");
+        }
+    }
 
     public GameObject Find(string layerGroup, string name)
     {
@@ -77,23 +89,7 @@ public class ObjectManager : MonoBehaviour
     }
     public GameObject Find(UILayerGroup layerGroup, string name)
     {
-        switch (layerGroup)
-        {
-            case UILayerGroup.BackGround:
-                return _backGround.Find(name).gameObject;
-            case UILayerGroup.BackEfect:
-                return _backEfect.Find(name).gameObject;
-            case UILayerGroup.Character:
-                return _character.Find(name).gameObject;
-            case UILayerGroup.FrontEfect:
-                return _frontEfect.Find(name).gameObject;
-            case UILayerGroup.UI:
-                return _ui.Find(name).gameObject;
-            case UILayerGroup.FrontMask:
-                return _frontMask.Find(name).gameObject;
-            default:
-                return null;
-        }
+        return GetGroup(layerGroup)?.Find(name).gameObject;
     }
 
     public bool TryFind(string layerGroup, string name, out GameObject gameObject)
@@ -132,6 +128,26 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
+    RectTransform GetGroup(UILayerGroup layerGroup)
+    {
+        switch (layerGroup)
+        {
+            case UILayerGroup.BackGround:
+                return _backGround;
+            case UILayerGroup.BackEfect:
+                return _backEfect;
+            case UILayerGroup.Character:
+                return _character;
+            case UILayerGroup.FrontEfect:
+                return _frontEfect;
+            case UILayerGroup.UI:
+                return _ui;
+            case UILayerGroup.FrontMask:
+                return _frontMask;
+            default:
+                return null;
+        }
+    }
 
     public enum UILayerGroup
     {

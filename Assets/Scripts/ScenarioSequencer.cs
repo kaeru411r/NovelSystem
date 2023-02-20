@@ -11,10 +11,8 @@ public class ScenarioSequencer : MonoBehaviour
     [SerializeField] string _fileName;
     [Tooltip("オブジェクト管理用オブジェクト")]
     [SerializeField] ObjectManager _objectManager;
-    [Tooltip("テキスト表示用コンポーネント")]
-    [SerializeField] MonoSequentialActor _textWriter;
-    [Tooltip("ImageFade用コンポーネント")]
-    [SerializeField] MonoSequentialActor _fader;
+    [Tooltip("各処理用コンポーネント")]
+    [SerializeField] MonoSequentialActor[] _sequentialActors;
 
     const int csvOffsetNumber = 1;
     const int commandTypeIndex = 0;
@@ -32,24 +30,23 @@ public class ScenarioSequencer : MonoBehaviour
 
         foreach (string[] command in sequence)
         {
-            if(command.Length == 1 && command[0] == "") { break; }
+            if (command.Length == 1 && command[0] == "") { break; }
             CommandType commandType = CommandType.NaN;
             if (Enum.TryParse<CommandType>(command[commandTypeIndex], out commandType))
             {
-                switch (commandType)
+                if (commandType == CommandType.Wait)
                 {
-                    case CommandType.Write:
-                        enumeratorList.Add(_textWriter.ActivityCoroutine(command, skipSource.Token));
+                    yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
+                    skipSource = new SkipSource();
+                }
+                else
+                {
+                    MonoSequentialActor actor = _sequentialActors?.Where(a => a.CommandType == commandType).ToArray().FirstOrDefault();
+                    if(actor?.Activity(command, skipSource.Token, ref enumeratorList) is true)
+                    {
                         yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
                         skipSource = new SkipSource();
-                        break;
-                    case CommandType.Fade:
-                        enumeratorList.Add(_fader.ActivityCoroutine(command, skipSource.Token));
-                        break;
-                    case CommandType.Wait:
-                        yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
-                        skipSource = new SkipSource();
-                        break;
+                    }
                 }
             }
             else
@@ -184,19 +181,19 @@ public class ScenarioSequencer : MonoBehaviour
         action?.Invoke();
     }
 
-    public enum CommandType
-    {
-        NaN = -1,
-        Wait,
-        Write,
-        Instantiate,
-        Destroy,
-        Fade,
-        Color,
-        Layer,
-    }
 }
 
+public enum CommandType
+{
+    NaN = -1,
+    Wait,
+    Write,
+    Instantiate,
+    Destroy,
+    Fade,
+    Color,
+    Layer,
+}
 
 public class SkipSource
 {

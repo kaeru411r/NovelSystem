@@ -11,6 +11,9 @@ public class Fader : MonoSequentialActor
     const int colorIndex = 3;
     const int timeIndex = 4;
 
+    public override CommandType CommandType => CommandType.Fade;
+    protected override bool _isWait => false;
+
     public override IEnumerator Activity(string[] command, SkipToken token)
     {
         GameObject go = ObjectManager.Instance.Find(command[layerIndex], command[nameIndex]);
@@ -51,6 +54,4 @@ public class Fader : MonoSequentialActor
             Debug.LogError($"{command[nameIndex]}‚Ì{nameof(Image)}‚ªæ“¾‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B");
         }
     }
-
-
 }

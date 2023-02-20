@@ -16,6 +16,8 @@ public class TextWriter : MonoSequentialActor
     const int nameIndex = 1;
     const int textIndex = 2;
 
+    public override CommandType CommandType => CommandType.Write;
+    protected override bool _isWait => true;
 
     public override IEnumerator Activity(string[] command, SkipToken token)
     {

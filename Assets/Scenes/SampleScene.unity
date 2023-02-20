@@ -711,8 +711,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _fileName: testCSV.csv
   _objectManager: {fileID: 0}
-  _textWriter: {fileID: 1966800724}
-  _fader: {fileID: 708703452}
+  _sequentialActors:
+  - {fileID: 708703452}
+  - {fileID: 1966800724}
 --- !u!114 &708703452
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -832,6 +833,7 @@ GameObject:
   - component: {fileID: 722468834}
   - component: {fileID: 722468836}
   - component: {fileID: 722468835}
+  - component: {fileID: 722468837}
   m_Layer: 5
   m_Name: AlienB
   m_TagString: Untagged
@@ -897,6 +899,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 722468833}
   m_CullTransparentMesh: 1
+--- !u!114 &722468837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 722468833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa70789164ef96489afaf860edd2902, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &999718228
 GameObject:
   m_ObjectHideFlags: 0
@@ -908,6 +922,7 @@ GameObject:
   - component: {fileID: 999718229}
   - component: {fileID: 999718231}
   - component: {fileID: 999718230}
+  - component: {fileID: 999718232}
   m_Layer: 5
   m_Name: AlienA
   m_TagString: Untagged
@@ -973,6 +988,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 999718228}
   m_CullTransparentMesh: 1
+--- !u!114 &999718232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 999718228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fa70789164ef96489afaf860edd2902, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1000332152
 GameObject:
   m_ObjectHideFlags: 0
