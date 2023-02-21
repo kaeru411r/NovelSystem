@@ -208,6 +208,7 @@ public enum CommandType
     Fade,
     Color,
     Layer,
+    Move,
 }
 
 public class SkipSource
