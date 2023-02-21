@@ -39,10 +39,11 @@ public class Fader : MonoSequentialActor
 
                     if (token.IsSkip)
                     {
-                        image.color = target;
                         yield break;
                     }
                 }
+
+                image.color = target;
             }
             else
             {
