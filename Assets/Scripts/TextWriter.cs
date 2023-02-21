@@ -35,13 +35,14 @@ public class TextWriter : MonoSequentialActor
         foreach (char c in command[textIndex])
         {
             _text.text += c;
-            yield return new WaitForSeconds(1 / _writeSpeed);
 
             if (token.IsSkip)
             {
                 _text.text = command[textIndex];
                 yield break;
             }
+
+            yield return new WaitForSeconds(1 / _writeSpeed);
         }
     }
 }

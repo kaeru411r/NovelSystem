@@ -35,12 +35,13 @@ public class Fader : MonoSequentialActor
                 for (float p = 0; p < time; p += Time.deltaTime)
                 {
                     image.color = Color.Lerp(start, target, p / time);
-                    yield return null;
 
                     if (token.IsSkip)
                     {
                         yield break;
                     }
+
+                    yield return null;
                 }
 
                 image.color = target;
