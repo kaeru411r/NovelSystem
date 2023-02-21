@@ -709,11 +709,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feaff28d6e0b4e048b88ddcef7c94d7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fileName: testCSV.csv
+  _fileName: testCSV
   _objectManager: {fileID: 0}
   _sequentialActors:
-  - {fileID: 708703452}
   - {fileID: 1966800724}
+  - {fileID: 708703452}
 --- !u!114 &708703452
 MonoBehaviour:
   m_ObjectHideFlags: 0

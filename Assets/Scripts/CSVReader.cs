@@ -10,7 +10,8 @@ public class CSVReader
         string[] data = null;
         try
         {
-            data = File.ReadAllText(Application.persistentDataPath + "/" + fileName).Split('\n');
+            //data = File.ReadAllText(Application.persistentDataPath + "/" + fileName).Split('\n');
+            data = Resources.Load(fileName).ToString().Split('\n');
         }
         catch (IOException e)
         {
