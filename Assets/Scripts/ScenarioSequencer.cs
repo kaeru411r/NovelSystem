@@ -5,6 +5,10 @@ using System;
 using System.Linq;
 using TMPro;
 
+
+/// <summary>
+/// メインシーケンスを進行するクラス
+/// </summary>
 public class ScenarioSequencer : MonoBehaviour
 {
     [Tooltip("CSVファイルの名前")]
@@ -30,28 +34,40 @@ public class ScenarioSequencer : MonoBehaviour
 
         foreach (string[] command in sequence)
         {
-            if (command.Length == 1 && command[0] == "") { break; }
+            if (command.Length <= commandTypeIndex && command[commandTypeIndex] == "") { break; }
             CommandType commandType = CommandType.NaN;
             if (Enum.TryParse<CommandType>(command[commandTypeIndex], out commandType))
-            {
+            {   // コマンドタイプをEnumに変換
                 if (commandType == CommandType.Wait)
-                {
+                {   // コマンドタイプが待機命令なら待機
                     yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
                     skipSource = new SkipSource();
                 }
                 else
                 {
+                    //  対応するアクターの抽出
                     MonoSequentialActor actor = _sequentialActors?.Where(a => a.CommandType == commandType).ToArray().FirstOrDefault();
-                    if(actor?.Activity(command, skipSource.Token, ref enumeratorList) is true)
+                    //  シーケンスを実行
+                    var activity = actor?.StartActivity(command, skipSource.Token);
+                    if (activity != null)
                     {
-                        yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
-                        skipSource = new SkipSource();
+                        enumeratorList.Add(activity.Value.sequence);
+                        if (activity.Value.isWait)
+                        {   //  シーケンスが待機命令を出したら
+                            yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
+                            skipSource = new SkipSource();
+                        }
+                    }
+                    else
+                    {   //  アクターが登録されていなかったら
+                        Debug.LogError($"{command[commandTypeIndex]}は{nameof(MonoSequentialActor)}が登録されていません。");
+                        continue;
                     }
                 }
             }
             else
             {
-                Debug.LogError($"{nameof(command)}は不正なコマンドです。");
+                Debug.LogError($"{command[commandTypeIndex]}は不正なコマンドです。");
                 continue;
             }
         }
@@ -180,7 +196,6 @@ public class ScenarioSequencer : MonoBehaviour
         yield return enumerator;
         action?.Invoke();
     }
-
 }
 
 public enum CommandType

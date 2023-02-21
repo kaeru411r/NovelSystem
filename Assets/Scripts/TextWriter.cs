@@ -19,7 +19,7 @@ public class TextWriter : MonoSequentialActor
     public override CommandType CommandType => CommandType.Write;
     protected override bool _isWait => true;
 
-    public override IEnumerator Activity(string[] command, SkipToken token)
+    protected override IEnumerator Activity(string[] command, SkipToken token)
     {
         _name.text = command[nameIndex];
         _text.text = "";

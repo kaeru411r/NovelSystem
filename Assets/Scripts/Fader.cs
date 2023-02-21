@@ -14,7 +14,7 @@ public class Fader : MonoSequentialActor
     public override CommandType CommandType => CommandType.Fade;
     protected override bool _isWait => false;
 
-    public override IEnumerator Activity(string[] command, SkipToken token)
+    protected override IEnumerator Activity(string[] command, SkipToken token)
     {
         GameObject go = ObjectManager.Instance.Find(command[layerIndex], command[nameIndex]);
         if (go?.TryGetComponent(out Image image) is true)
