@@ -16,10 +16,14 @@ public class ScenarioSequencer : MonoBehaviour
     [Tooltip("オブジェクト管理用オブジェクト")]
     [SerializeField] ObjectManager _objectManager;
     [Tooltip("各処理用コンポーネント")]
-    [SerializeField] MonoSequentialActor[] _sequentialActors;
+    [SerializeField] List<MonoSequentialActor> _sequentialActors;
+    [Tooltip("自動再生")]
+    [SerializeField] bool _isAuto;
 
     const int csvOffsetNumber = 1;
     const int commandTypeIndex = 0;
+
+    public bool IsAuto { get => _isAuto; set => _isAuto = value; }
 
     private void Start()
     {
@@ -38,31 +42,23 @@ public class ScenarioSequencer : MonoBehaviour
             CommandType commandType = CommandType.NaN;
             if (Enum.TryParse<CommandType>(command[commandTypeIndex], out commandType))
             {   // コマンドタイプをEnumに変換
-                if (commandType == CommandType.Wait)
-                {   // コマンドタイプが待機命令なら待機
-                    yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
-                    skipSource = new SkipSource();
+                //  対応するアクターの抽出
+                MonoSequentialActor actor = _sequentialActors?.Where(a => a.CommandType == commandType).ToArray().FirstOrDefault();
+                //  シーケンスを実行
+                var activity = actor?.StartActivity(command, skipSource.Token);
+                if (activity != null)
+                {
+                    enumeratorList.Add(activity.Value.sequence);
+                    if (activity.Value.isWait)
+                    {   //  シーケンスが待機命令を出したら
+                        yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
+                        skipSource = new SkipSource();
+                    }
                 }
                 else
-                {
-                    //  対応するアクターの抽出
-                    MonoSequentialActor actor = _sequentialActors?.Where(a => a.CommandType == commandType).ToArray().FirstOrDefault();
-                    //  シーケンスを実行
-                    var activity = actor?.StartActivity(command, skipSource.Token);
-                    if (activity != null)
-                    {
-                        enumeratorList.Add(activity.Value.sequence);
-                        if (activity.Value.isWait)
-                        {   //  シーケンスが待機命令を出したら
-                            yield return Activity(enumeratorList, WaitForGetMouseButtonDown, skipSource);
-                            skipSource = new SkipSource();
-                        }
-                    }
-                    else
-                    {   //  アクターが登録されていなかったら
-                        Debug.LogError($"{command[commandTypeIndex]}は{nameof(MonoSequentialActor)}が登録されていません。");
-                        continue;
-                    }
+                {   //  アクターが登録されていなかったら
+                    Debug.LogError($"{command[commandTypeIndex]}は{nameof(MonoSequentialActor)}が登録されていません。");
+                    continue;
                 }
             }
             else
@@ -127,10 +123,19 @@ public class ScenarioSequencer : MonoBehaviour
 
         if (wait != null)
         {
-            yield return StartCoroutine(wait?.Invoke());
+            yield return WaitAnyCoroutine(StartCoroutine(wait?.Invoke()), WaitUntilCoroutine(() => { return _isAuto; }));
         }
 
         enumerators.Clear();
+    }
+
+    IEnumerator WaitUntil(Func<bool> predicate)
+    {
+        yield return new WaitUntil(predicate);
+    }
+    Coroutine WaitUntilCoroutine(Func<bool> predicate)
+    {
+        return StartCoroutine(new WaitUntil(predicate));
     }
 
     /// <summary>
@@ -196,19 +201,6 @@ public class ScenarioSequencer : MonoBehaviour
         yield return enumerator;
         action?.Invoke();
     }
-}
-
-public enum CommandType
-{
-    NaN = -1,
-    Wait,
-    Write,
-    Instantiate,
-    Destroy,
-    Fade,
-    Color,
-    Layer,
-    Move,
 }
 
 public class SkipSource

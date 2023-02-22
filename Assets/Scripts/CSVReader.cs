@@ -31,7 +31,11 @@ public class CSVReader
         List<string[]> csv = new List<string[]>();
         for (int i = offset; i < data.Length; i++)
         {
-            csv.Add(data[i].Split(','));
+            string[] strings = data[i].Split(',');
+            if (strings[0] != "")
+            {
+                csv.Add(strings);
+            }
         }
         return csv.ToArray();
     }

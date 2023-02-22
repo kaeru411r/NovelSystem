@@ -25,7 +25,6 @@ public class Mover : MonoSequentialActor
                 for (float process = 0; process < time; process += Time.deltaTime)
                 {
                     transform.anchoredPosition = Vector2.Lerp(start, target, process / time);
-                    Debug.Log(transform.anchoredPosition);
 
                     if (token.IsSkip)
                     {

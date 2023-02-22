@@ -38,7 +38,7 @@ public class Fader : MonoSequentialActor
 
                     if (token.IsSkip)
                     {
-                        yield break;
+                        break;
                     }
 
                     yield return null;

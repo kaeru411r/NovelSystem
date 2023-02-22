@@ -4,6 +4,7 @@ Write,AlienA,ああああああああああああああああああああああ�
 Fade,BackGround,Image1,#ffffff00,1.5,
 Fade,BackGround,Image2,#ffffffff,1.5,
 Write,AlienB,いいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいいい,,,
+Wait,,,,,
 Move,Character,AlienA,30,30,1.5
 Write,AlienA,ううううううううううううううううううううううううううううううううううううううううううううううううううううううう,,,
 Write,AlienB,ええええええええええええええええええええええええええええええええええええええええええええええええええええ,,,
