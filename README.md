@@ -1,4 +1,8 @@
 # NovelSystem
+# 操作説明
+* ゲーム画面をクリックして進行
+* GameObjectにアタッチされたScenarioSequencerのIsAuto項目をtrueにすると自動的にシナリオが進む。
+* FileNameにResources内のフォーマットに則ったCSVファイルの名前を入力することでシナリオを切り替えられる…が、デモ用のCSVの用意が一つしかない。
 ## ScenarioSequencer
 メインのシーケンスを実行する。
 * MainSequence内でCSVに書かれた命令を各実行コンポーネントに送っていく。
