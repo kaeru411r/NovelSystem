@@ -24,6 +24,7 @@ public class ScenarioSequencer : MonoBehaviour
     const int commandTypeIndex = 0;
 
     public bool IsAuto { get => _isAuto; set => _isAuto = value; }
+    public List<MonoSequentialActor> SequentialActors { get => _sequentialActors; set => _sequentialActors = value; }
 
     private void Start()
     {
