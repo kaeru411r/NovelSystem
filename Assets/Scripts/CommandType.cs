@@ -13,4 +13,5 @@ public enum CommandType
     Color,
     Layer,
     Move,
+    Audio,
 }

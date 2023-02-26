@@ -26,15 +26,17 @@ public class TextWriter : MonoSequentialActor
 
         if (ObjectManager.Instance.TryFind(ObjectManager.UILayerGroup.Character, command[nameIndex], out GameObject gameObject))
         {
-            if(gameObject.TryGetComponent(out ActorController actor))
+            if (gameObject.TryGetComponent(out ActorController actor))
             {
                 actor.Activate();
             }
         }
 
-        foreach (char c in command[textIndex])
+        float time = 0;
+        float procces = 0;
+        int index = 0;
+        while (index < command[textIndex].Length)
         {
-            _text.text += c;
 
             if (token.IsSkip)
             {
@@ -42,7 +44,17 @@ public class TextWriter : MonoSequentialActor
                 yield break;
             }
 
-            yield return new WaitForSeconds(1 / _writeSpeed);
+            if (time < procces)
+            {
+                yield return null;
+                time += Time.deltaTime;
+            }
+            else
+            {
+                _text.text += command[textIndex][index];
+                index++;
+                procces += 1 / _writeSpeed;
+            }
         }
     }
 }

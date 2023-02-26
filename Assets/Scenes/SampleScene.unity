@@ -718,7 +718,7 @@ MonoBehaviour:
   - {fileID: 708703452}
   - {fileID: 708703455}
   - {fileID: 708703456}
-  _isAuto: 1
+  _isAuto: 0
 --- !u!114 &708703452
 MonoBehaviour:
   m_ObjectHideFlags: 0
